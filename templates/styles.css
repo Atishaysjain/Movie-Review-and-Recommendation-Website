@@ -1,0 +1,19 @@
+a.button {
+  background-color: #040953; 
+  border: none;
+  color: rgb(205, 207, 77);
+   text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 40px;
+  font-family: Poppins-Regular;
+  padding: 12px;
+  width: 12%;
+  height: 50px;
+}
+
+
+.container-review1{width:1700px;
+padding-right:1px;
+padding-left:1px;
+margin-right:1px;margin-left:5px}

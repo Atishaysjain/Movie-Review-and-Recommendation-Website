@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+	<style type="text/css">
+		.button {
+		  background-color: #040953; 
+		  border: none;
+		  color: rgb(205, 207, 77);
+		   text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		  font-family: Poppins-Regular;
+		  padding: 12px;
+		  width: 12%;
+		  height: 50px;
+		}
+
+		.container-review1{width:1700px;
+		padding-right:1px;
+		padding-left:1px;
+		margin-right:1px;margin-left:5px}
+	</style>
+
+	<title>Movie Visualization</title>
+</head>
+<body style="background-image: url('static/images/Film-Reel-Wallpaper.jpg'); background-repeat: no-repeat; background-size: cover;">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{url_for('home')}}"><img src = 'static/images/movie-review-website.png' height= 70px; width = 70px;>NotIMDb</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="{{url_for('hello')}}">Visualization</a></li>
+			<li><a href="{{url_for('review')}}">Recommended Movies</a></li>
+		</ul>
+        </div>
+    </nav>
+    <div class="container-review1">
+		<h1 style="color: #55cef3;" align="center">Visualization Playground</h1>
+		<a href="{{url_for('Top_20_Rating')}}" class="button">Top 20 Rated</a>
+		<a href="{{url_for('Bottom_20_Rating')}}" class="button">Bottom 20 Rated</a>
+		<a href="{{url_for('Highest_Grossing')}}" class="button">Top 20 Grossing</a>
+		<a href="{{url_for('Least_Grossing')}}" class="button">Bottom 20 Grossing</a>
+		<a href="{{url_for('Highest_Budget')}}" class="button">20 Highest Budget Movies</a>
+		<a href="{{url_for('Lowest_Budget')}}" class="button">20 Lowest Budget Movies</a>
+		<a href="{{url_for('Most_lengthy_movies')}}" class="button">Top 20 Most Lengthy</a>
+	</div>
+	<div class="container-login100">
+		<div style="margin-left: 100px; margin-top: 30px;"><div id="chart" style="width:1300px; height:500px;"></div></div>
+        <br/>
+		
+        <ul style= "background: black; background: rgba(0, 0, 0, 0.5); color: #f1f1f1; margin-left: 300px; width:20%">
+			<li>Y-values<select class="chart" id="xrange" style = "color: black;"></select></li>
+			<li>X-values<select class="chart" id="yrange" style = "color: black;"></select></li>
+		</ul>
+						
+	</div>
+
+<script src="https://www.google.com/jsapi"></script>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<!--<script src="./jquery.csv-0.71.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+<script>
+
+    // load the visualization library from Google and set a listener
+    google.load("templates", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+        // grab the CSV
+        thecsvfile = "MI.csv"
+
+        $.get(thecsvfile, function(csvString) {
+
+            // transform the CSV string into a 2-dimensional array
+            var arrayData = $.csv.toArrays(csvString, {onParseValue: $.csv.hooks.castToScalar});
+
+            // use arrayData to load the select elements with the appropriate options
+            for (var i = 0; i < arrayData[0].length; i++) {
+                //* this adds the given option to both select elements
+                 $("select").append("<option value='" + i + "'>" + arrayData[0][i] + "</option>");
+            }
+
+            // set the default selection
+            $("#xrange option[value='1']").attr("selected","selected");
+            $("#yrange option[value='0']").attr("selected","selected");
+            $("domain option[value='3']").attr("selected","selected");
+
+            // this new DataTable object holds all the data
+            var data = new google.visualization.arrayToDataTable(arrayData);
+
+            // this view can select a subset of the data at a time
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0,1]);
+
+            var options = {
+                title: "Movie Details",
+                hAxis: {title: data.getColumnLabel(0), minValue: data.getColumnRange(0).min, maxValue: data.getColumnRange(0).max},
+                vAxis: {title: data.getColumnLabel(1), minValue: data.getColumnRange(1).min, maxValue: data.getColumnRange(1).max},
+                legend: 'none'
+            };
+	
+            var chart = new google.visualization.LineChart(document.getElementById('chart'));
+            chart.draw(view, options);
+
+            // set listener for the update button
+            $("select").click(function(){
+
+               // determine selected domain and range
+                var xrange = +$("#xrange option:selected").val();
+                var yrange = +$("#yrange option:selected").val();
+                var domain = +$("#domain option:selected").val();
+
+                // update the view
+                view.setColumns([yrange,xrange]);
+
+                // update the options
+                options.hAxis.title = data.getColumnLabel(yrange);
+                options.hAxis.minValue = data.getColumnRange(xrange).min;
+                options.hAxis.maxValue = data.getColumnRange(xrange).max;
+                options.vAxis.title = data.getColumnLabel(xrange);
+                options.vAxis.minValue = data.getColumnRange(yrange).min;
+                options.vAxis.maxValue = data.getColumnRange(yrange).max;
+
+                chart.draw(view, options);
+            });
+        });
+    }
+</script>  
+</body>
+</html>
